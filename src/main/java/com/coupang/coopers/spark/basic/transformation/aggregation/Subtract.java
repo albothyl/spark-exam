@@ -1,0 +1,44 @@
+package com.coupang.coopers.spark.basic.transformation.aggregation;
+
+import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * 두 RDD_1, RDD_2에서 RDD_1에만 속하는 값으로 RDD를 만든다. (차집합)
+ *
+ * @Input1 : [a, b, c, d, e]
+ * @Input2 : [d, e]
+ * @Output : [a, b, c]
+ */
+@Slf4j
+public class Subtract implements Serializable {
+
+	final SparkConf conf = new SparkConf().setMaster("local").setAppName("Test").set("spark.driver.host", "localhost");
+	final JavaSparkContext sc = new JavaSparkContext(conf);
+
+	public static void main(String[] args) {
+		Subtract subtract = new Subtract();
+		subtract.run();
+	}
+
+	private void run() {
+		List<String> input_1 = Lists.newArrayList("a", "b", "c", "d", "e");
+		List<String> input_2 = Lists.newArrayList("d", "e");
+		List<String> output;
+
+		JavaRDD<String> rdd_1 = sc.parallelize(input_1);
+		JavaRDD<String> rdd_2 = sc.parallelize(input_2);
+		JavaRDD<String> result = rdd_1.subtract(rdd_2);
+		output = result.collect();
+
+		log.warn("INPUT 1 : " + input_1);
+		log.warn("INPUT 2 : " + input_2);
+		log.warn("OUTPUT : " + output);
+	}
+}
